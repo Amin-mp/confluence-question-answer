@@ -26,6 +26,11 @@ public class RagServiceImpl implements RagService {
         this.chatClient = chatClient;
     }
 
+    /**
+     * Ask a question using RAG approach
+     * @param question
+     * @return
+     */
     @Override
     public String ask(String question) {
         // 1. Embed the question

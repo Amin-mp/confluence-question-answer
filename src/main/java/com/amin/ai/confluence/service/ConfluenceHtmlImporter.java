@@ -42,7 +42,7 @@ public class ConfluenceHtmlImporter {
     public void importHtmlDirectory(String folderPath) throws IOException {
         File folder = new File(folderPath);
         for (File file : Objects.requireNonNull(folder.listFiles((d, name) -> name.endsWith(".html")))) {
-            processHtmlFile(file);
+            chunkEmbedSaveHtmlFile(file);
 
             // Move processed file to "done" directory
             if (file.isFile() && file.exists()) {
@@ -52,17 +52,17 @@ public class ConfluenceHtmlImporter {
     }
 
     /**
-     * Process a single HTML file, extracting sections and saving them to Weaviate.
+     * Chunk, embed, and save HTML file content to Weaviate
      * @param file
      * @throws IOException
      */
-    private void processHtmlFile(File file) throws IOException {
+    private void chunkEmbedSaveHtmlFile(File file) throws IOException {
         Document doc = Jsoup.parse(file, "UTF-8");
         String title = doc.title();
         Elements sections = doc.select("h2, h3");
 
         if (sections.isEmpty()) {
-            saveToWeaviate(title, "main", doc.body().text(), null, null);
+            embedAndSaveToWeaviate(title, "main", doc.body().text(), null, null);
         } else {
             for (Element section : sections) {
                 String sectionTitle = section.text();
@@ -76,13 +76,21 @@ public class ConfluenceHtmlImporter {
 
                 String content = contentBuilder.toString().trim();
                 if (!content.isEmpty()) {
-                    saveToWeaviate(sectionTitle, file.getName(), content, null, null);
+                    embedAndSaveToWeaviate(sectionTitle, file.getName(), content, null, null);
                 }
             }
         }
     }
 
-    private void saveToWeaviate(String title, String url, String content, String tags, String metadataJson) {
+    /**
+     * Embed content and save to Weaviate
+     * @param title
+     * @param url
+     * @param content
+     * @param tags
+     * @param metadataJson
+     */
+    private void embedAndSaveToWeaviate(String title, String url, String content, String tags, String metadataJson) {
         float[] embedding = embeddingModel.embed(content);
         Map<String, Object> props = new HashMap<>();
         props.put("title", title);
@@ -90,9 +98,9 @@ public class ConfluenceHtmlImporter {
         props.put("content", content);
         props.put("tags", tags);
         props.put("metadata", metadataJson);
-        String nowRfc3339 = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        props.put("createdAt", nowRfc3339);
-        props.put("updatedAt", nowRfc3339);
+        String formattedDate = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        props.put("createdAt", formattedDate);
+        props.put("updatedAt", formattedDate);
         // confluencePageUpdatedAt: not available from HTML, set null or RFC3339 default
         props.put("confluencePageUpdatedAt", null);
         // weaviateId: will be set by Weaviate, so set null here
