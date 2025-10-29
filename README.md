@@ -1,9 +1,10 @@
-**AI-Powered Q&A System with Spring Boot, Ollama, and Weaviate**
+AI-Powered Q&A System with Spring Boot, Ollama, and Weaviate
+---
 
-**Application Design and Flow**
+**Overview**
 The project uses Spring Boot and Spring AI to build a REST API for answering questions based on company documents. 
 A directory watcher monitors for new HTML files, which are manually extracted and placed in a folder. 
-These files are chunked based on <h2> and <h3> tags, embedded using Ollama nomic-embed-text, and stored in Weaviate. 
+These files are chunked based on h2 and h3 tags, embedded using Ollama nomic-embed-text, and stored in Weaviate. 
 The query-response flow begins when a user sends a question to the Spring Boot REST API. 
 The query is embedded using Ollama nomic-embed-text and compared against stored vectors in Weaviate. 
 The top relevant chunks are retrieved and combined into a context string. 
@@ -11,16 +12,18 @@ This context, along with the original query, is passed to Ollama Mistral, which 
 
 ![img.png](img.png)
 
-**Technology Stack**
+**Technologies Used**
 Spring Boot & Spring Web for application core and REST API.
 Spring AI to integrate with Ollama models for embeddings and LLM responses.
 Weaviate for vector storage and retrieval.
 Jsoup for HTML parsing and chunking.
 
-How to Start the instance:
+**Setup Instructions**
 1. Ensure Ollama is installed and running locally with the required models (nomic-embed-text and Mistral).
 2. Ensure Weaviate is running locally (e.g., via Docker).
 3. Configure application properties (e.g., Ollama and Weaviate endpoints).
+4. set ai.confluence.html.directory to the path of the monitored directory for HTML files.
+5. set ai.confluence.done.directory to the path where processed files will be moved.
 4. Run the Spring Boot application.
 5. Place HTML files in the monitored directory to trigger processing.
 6. Send queries to the REST API endpoint to receive answers based on the document content.
@@ -29,7 +32,7 @@ How to Start the instance:
    - Response: Generated answer based on document context.
    - Example using curl:
      ```
-     curl -X POST http://localhost:8080/api/ask -H "Content-Type: text/plain" -d "What is Spring Boot?"
+     curl -X POST http://localhost:9090/api/ask -H "Content-Type: text/plain" -d "What is Spring Boot?"
      ```
      
 **How to Start Ollama:**
