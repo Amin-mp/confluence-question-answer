@@ -1,6 +1,5 @@
 package com.amin.ai.confluence.model;
 
-
 import lombok.*;
 import java.time.LocalDateTime;
 

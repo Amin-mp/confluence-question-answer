@@ -1,5 +1,6 @@
 package com.amin.ai.confluence.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -12,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -23,6 +23,7 @@ import java.util.Objects;
  * @author <a href="amin.malekpour@e2open.com">Amin Malekpour</a>
  * @version 2.0, 26/Oct/2025
  */
+@Slf4j
 @Service
 public class ConfluenceHtmlImporter {
 
@@ -30,9 +31,9 @@ public class ConfluenceHtmlImporter {
     private String doneDirectory;
 
     private final WeaviateService weaviateService;
-    private final EmbeddingModel embeddingModel;
+    private final EmbeddingModel  embeddingModel;
 
-    public ConfluenceHtmlImporter(WeaviateService weaviateService,
+    public ConfluenceHtmlImporter(WeaviateServiceImpl weaviateService,
                                   EmbeddingModel embeddingModel) {
         this.weaviateService = weaviateService;
         this.embeddingModel = embeddingModel;
@@ -50,6 +51,11 @@ public class ConfluenceHtmlImporter {
         }
     }
 
+    /**
+     * Process a single HTML file, extracting sections and saving them to Weaviate.
+     * @param file
+     * @throws IOException
+     */
     private void processHtmlFile(File file) throws IOException {
         Document doc = Jsoup.parse(file, "UTF-8");
         String title = doc.title();
@@ -91,9 +97,13 @@ public class ConfluenceHtmlImporter {
         props.put("confluencePageUpdatedAt", null);
         // weaviateId: will be set by Weaviate, so set null here
         props.put("weaviateId", null);
+
+        log.info("start saving document to Weaviate: {}", title);
         boolean success = weaviateService.saveDocument(props, embedding);
+
         if (!success) {
             throw new RuntimeException("Failed to save to Weaviate");
         }
+        log.info("Successfully saved document to Weaviate: {}", title);
     }
 }
