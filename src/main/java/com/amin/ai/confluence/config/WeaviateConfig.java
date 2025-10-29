@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class WeaviateConfig {
 
-    @Value("${weaviate.ip-port}")
+    @Value("${ai.confluence.weaviate.ip-port}")
     private String weaviateIpPort;
 
     @Bean

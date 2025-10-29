@@ -3,6 +3,7 @@ package com.amin.ai.confluence.service;
 import io.weaviate.client.WeaviateClient;
 import io.weaviate.client.v1.schema.model.WeaviateClass;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.List;
@@ -18,7 +19,9 @@ import io.weaviate.client.v1.graphql.query.argument.NearVectorArgument;
 @Service
 public class WeaviateServiceImpl implements WeaviateService {
 
-    private static final int SEMANTIC_SEARCH_LIMIT = 6;
+    @Value("${ai.confluence.semantic_search.result.limit:10}")
+    private int semanticSearchLimit;
+
     private final WeaviateClient client;
 
     public WeaviateServiceImpl(WeaviateClient client) {
@@ -107,7 +110,7 @@ public class WeaviateServiceImpl implements WeaviateService {
                 Field.builder().name("updatedAt").build()
             )
             .withNearVector(nearVector)
-            .withLimit(SEMANTIC_SEARCH_LIMIT)
+            .withLimit(semanticSearchLimit)
             .run();
 
         if (result.getResult() == null) {
